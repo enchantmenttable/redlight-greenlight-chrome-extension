@@ -1,0 +1,21 @@
+{
+    "name": "Redlight Greenlight",
+    "description": "blank",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": [
+        "tabs",
+        "storage",
+        "scripting",
+        "activeTab"
+    ],
+    "background": {
+        "service_worker": "src/js/background.js"
+    },
+    "action": {
+        "default_popup": "src/html/popup.html"
+    },
+    "icons": {
+        "48": "src/images/that-doll.png"
+    }
+}
