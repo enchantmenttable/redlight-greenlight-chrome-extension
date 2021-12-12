@@ -28,6 +28,6 @@ chrome.runtime.onMessage.addListener((message, sender, response) => {
         window.clearInterval(currentIntervalId);
         chrome.runtime.sendMessage({ type: "stop" });
     } else if (message.type === "play") {
-        currentIntervalId = setInterval(switcher, 4000);
+        currentIntervalId = setInterval(switcher, 3500);
     }
 })
