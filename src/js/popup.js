@@ -1,4 +1,3 @@
-const startButton = document.getElementById("start");
 const playButton = document.getElementById("play");
 
 async function readLocalStorage(key) {
@@ -13,74 +12,23 @@ async function readLocalStorage(key) {
     })
 }
 
-// async function init() {
-//     playButton.checked = await readLocalStorage("play");
-// }
-// init()
-
+async function init() {
+    try {
+        playButton.checked = await readLocalStorage("play");
+    } catch {
+        playButton.checked = false;
+    }
+}
+init()
 
 playButton.addEventListener("change", async () => {
     let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        args: [playButton.checked],
-        func: switchState,
-    });
 
-    chrome.storage.local.set({ play: playButton.checked })
-})
-
-
-function switchState(isPlaying) {
-    function redlight() {
-        const allInputs = document.getElementsByTagName("input");
-        Array.from(allInputs).forEach(input => {
-            input.value = ""
-        });
-    }
-
-    function play() {
-        if (switcher) {
-            chrome.runtime.sendMessage({ type: "updateRedIcon" });
-            setTimeout(() => {
-                document.addEventListener("keypress", redlight);
-                switcher = 0;
-                console.log("done red");
-            }, 400);
-        } else {
-            chrome.runtime.sendMessage({ type: "updateGreenIcon" });
-            document.removeEventListener("keypress", redlight);
-            switcher = 1;
-            console.log("done green");
-        }
-    }
-
-    let switcher = 1;
-    if (isPlaying) {
-        let intervalId = setInterval(play, 1500);
-        chrome.runtime.sendMessage({ type: "setInterval", id: intervalId });
+    if (playButton.checked) {
+        chrome.tabs.sendMessage(tab.id, { type: "play" });
+        chrome.storage.local.set({ play: true });
     } else {
-        chrome.runtime.sendMessage({ type: "clearInterval" });
-        console.log("unchecked");
-    }
-}
-
-chrome.runtime.onMessage.addListener((message, sender, response) => {
-    if (message.type === "hehe") {
-
-        chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
-            chrome.scripting.executeScript({
-                target: { tabId: tabs[0].id },
-                args: [message.id],
-                func: injectClearInterval,
-            });
-
-        });
-
+        chrome.tabs.sendMessage(tab.id, { type: "stop" });
+        chrome.storage.local.set({ play: false })
     }
 })
-
-function injectClearInterval(intervalId) {
-    console.log("clearInterval from background received");
-    window.clearInterval(intervalId);
-}
